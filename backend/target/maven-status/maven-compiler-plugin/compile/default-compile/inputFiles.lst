@@ -1,0 +1,5 @@
+/home/kvervandi/person-generator/backend/src/main/java/com/kvervandi/persongenerator/PersonGeneratorApplication.java
+/home/kvervandi/person-generator/backend/src/main/java/com/kvervandi/persongenerator/controller/PersonController.java
+/home/kvervandi/person-generator/backend/src/main/java/com/kvervandi/persongenerator/model/Address.java
+/home/kvervandi/person-generator/backend/src/main/java/com/kvervandi/persongenerator/model/Person.java
+/home/kvervandi/person-generator/backend/src/main/java/com/kvervandi/persongenerator/service/PersonService.java

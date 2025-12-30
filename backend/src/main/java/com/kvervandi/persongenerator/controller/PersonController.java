@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/person")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/person") // Prefixo global
+@CrossOrigin(origins = "*")    // Permissão para o Frontend entrar
 public class PersonController {
 
     private final PersonService personService;
@@ -19,7 +19,7 @@ public class PersonController {
         this.personService = personService;
     }
 
-    @GetMapping("/person")
+    @GetMapping 
     public ResponseEntity<Person> generatePerson() {
         Person person = personService.generatePerson();
         return ResponseEntity.ok(person);
