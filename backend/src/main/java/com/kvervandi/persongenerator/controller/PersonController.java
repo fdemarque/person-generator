@@ -1,4 +1,4 @@
-package com.kvervandi.persongenerator.model;
+package com.kvervandi.persongenerator.controller;
 
 import com.kvervandi.persongenerator.model.Person;
 import com.kvervandi.persongenerator.service.PersonService;
@@ -19,8 +19,9 @@ public class PersonController {
         this.personService = personService;
     }
 
-    @GetMapping
-    public ResponseEntity<Person> getPerson() {
-        return ResponseEntity.ok(personService.getPerson());
+    @GetMapping("/person")
+    public ResponseEntity<Person> generatePerson() {
+        Person person = personService.generatePerson();
+        return ResponseEntity.ok(person);
     }
 }
