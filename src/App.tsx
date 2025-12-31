@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
+import { Copy, Check, FileJson } from 'lucide-react'
 
-// 1. Definição dos Tipos (O "Molde" dos dados que vêm do Java)
+// Interfaces (Mantidas iguais)
 interface Address {
   street: string;
   number: string;
@@ -19,69 +20,119 @@ interface Person {
 }
 
 function App() {
-  // 2. Estado Tipado (Aqui corrigimos o erro 'never')
   const [person, setPerson] = useState<Person | null>(null)
   const [loading, setLoading] = useState(false)
+  // Estado para controlar qual campo foi copiado recentemente (para feedback visual)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
 
-  // 3. Função de Busca
+  // Função de Copiar Genérica
+  const copyToClipboard = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(fieldName)
+    // Reseta o ícone de "copiado" após 2 segundos
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
   const handleGenerate = async () => {
     setLoading(true)
     try {
-      // Ajuste a URL se necessário (ex: tirar o /api se mudou no Java)
       const response = await fetch('http://localhost:8080/api/person')
-      
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`)
-      }
-      
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`)
       const data = await response.json()
-      console.log("Dados recebidos:", data) // Para debug no F12
       setPerson(data)
-      
     } catch (error) {
       console.error("Erro ao conectar:", error)
-      alert("Erro ao conectar com o Backend. Verifique se o Java está rodando na porta 8080.")
+      alert("Erro ao conectar com o Backend.")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 font-sans">
       
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-md space-y-6">
         
-        <h1 className="text-3xl font-bold text-white text-center mb-8">
+        <h1 className="text-3xl font-bold text-white text-center tracking-tight">
           Gerador de Pessoas
         </h1>
 
-        {/* Só exibe se 'person' não for nulo */}
         {person && (
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 text-slate-200 shadow-xl space-y-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-300">
             
-            <div className="border-b border-slate-800 pb-4">
-              <h2 className="text-xl font-bold text-white mb-1">{person.fullName}</h2>
-              <p className="text-sm text-slate-500">CPF: {person.cpf}</p>
-              <p className="text-sm text-slate-500">Tel: {person.phoneNumber}</p>
+            {/* Cabeçalho */}
+            <div className="border-b border-slate-800 pb-5 space-y-2">
+              <h2 className="text-2xl font-bold text-white tracking-wide">{person.fullName}</h2>
+              
+              {/* Linha CPF com Botão de Copiar */}
+              <div className="flex items-center justify-between group">
+                <p className="text-sm font-medium text-slate-300"> {/* Cor clareada para leitura */}
+                  CPF: <span className="font-mono text-slate-100">{person.cpf}</span>
+                </p>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-slate-400 hover:text-white"
+                  onClick={() => copyToClipboard(person.cpf, 'cpf')}
+                  title="Copiar CPF"
+                >
+                  {copiedField === 'cpf' ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                </Button>
+              </div>
+
+              {/* Linha Telefone com Botão de Copiar */}
+              <div className="flex items-center justify-between group">
+                <p className="text-sm font-medium text-slate-300"> {/* Cor clareada para leitura */}
+                  Telefone: <span className="font-mono text-slate-100">{person.phoneNumber}</span>
+                </p>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-slate-400 hover:text-white"
+                  onClick={() => copyToClipboard(person.phoneNumber, 'phoneNumber')}
+                  title="Copiar Telefone"
+                >
+                  {copiedField === 'phoneNumber' ? <Check size={15} className="text-green-500" /> : <Copy size={15} />}
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-1 text-sm">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Endereço</h3>
-              <p>{person.address.street}, {person.address.number}</p>
-              <p>{person.address.neighborhood}</p>
-              <p>{person.address.city} - {person.address.state}</p>
-              <p className="text-slate-500">CEP: {person.address.cep}</p>
+            {/* Endereço */}
+            <div className="space-y-2 text-sm">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Endereço</h3>
+              <p className="text-slate-300">{person.address.street}, {person.address.number}</p>
+              <p className="text-slate-300">{person.address.neighborhood}</p>
+              <p className="text-slate-300">{person.address.city} - {person.address.state}</p>
+              
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-slate-400 font-semibold">CEP:</span>
+                <span className="text-slate-200 font-mono">{person.address.cep}</span>
+              </div>
+            </div>
+
+            {/* Ações do Card (Copiar JSON) */}
+            <div className="pt-2">
+               <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white text-xs gap-2"
+                  onClick={() => copyToClipboard(JSON.stringify(person, null, 2), 'json')}
+               >
+                  {copiedField === 'json' ? <Check size={14} className="text-green-500" /> : <FileJson size={14} />}
+                  {copiedField === 'json' ? "JSON Copiado!" : "Copiar JSON Completo"}
+               </Button>
             </div>
 
           </div>
         )}
 
+        {/* Botão Principal */}
         <Button 
           onClick={handleGenerate} 
           disabled={loading} 
-          className="w-full h-12 text-lg font-semibold"
+          className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-slate-200 transition-all"
         >
-          {loading ? "Conectando ao Java..." : "Gerar Identidade"}
+          {loading ? "Processando..." : "Gerar Identidade"}
         </Button>
 
       </div>
